@@ -14,9 +14,7 @@ import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
 
 import javax.sound.midi.Soundbank;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.sql.SQLOutput;
 import java.util.Arrays;
 import java.util.Collections;
@@ -114,13 +112,39 @@ public class GoogleDriveSkladiste extends SpecifikacijaSkladista {
      */
 
     @Override
-    public void deleteFile(String s, String s1) {
+    public void deleteFile(String fileId, String s1) {
+        try {
+            getDriveService().files().delete(fileId).execute();
+        } catch (IOException e) {
+            System.out.println("An error occurred: " + e);
+        }
+    }
+
+    @Override
+    public void deleteFolder(String fileId, String s1) {
+
+        try {
+            getDriveService().files().delete(fileId).execute();
+        } catch (IOException e) {
+            System.out.println("An error occurred: " + e);
+        }
+    }
+
+    @Override
+    public void moveFromTo(String s, String s1, String s2) {
 
     }
 
     @Override
-    public void deleteFolder(String s, String s1) {
-
+    public void downloadFile(String fileId) {
+        //String fileId = "0BwwA4oUTeiV1UVNwOHItT0xfa2M";
+        OutputStream outputStream = new ByteArrayOutputStream();
+        try {
+            getDriveService().files().get(fileId)
+                    .executeMediaAndDownloadTo(outputStream);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
