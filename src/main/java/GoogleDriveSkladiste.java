@@ -12,6 +12,7 @@ import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
+import com.google.gson.Gson;
 
 import javax.sound.midi.Soundbank;
 import java.io.*;
@@ -54,6 +55,7 @@ public class GoogleDriveSkladiste extends SpecifikacijaSkladista {
             e.printStackTrace();
         }
         root = file.getId();
+        makeDefaultConfig(root, username);
         System.out.println("Folder ID: " + root);
 
         return true;
@@ -66,7 +68,6 @@ public class GoogleDriveSkladiste extends SpecifikacijaSkladista {
     @Override
     public boolean createFile(String id, String name) {
 
-        //String folderId = "0BwwA4oUTeiV1TGRPeTVjaWRDY1E";
         File fileMetadata = new File();
         fileMetadata.setName("photo.jpg");
         fileMetadata.setParents(Collections.singletonList(id));
@@ -77,6 +78,7 @@ public class GoogleDriveSkladiste extends SpecifikacijaSkladista {
             file = getDriveService().files().create(fileMetadata, mediaContent)
                     .setFields("id, parents")
                     .execute();
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -197,13 +199,21 @@ public class GoogleDriveSkladiste extends SpecifikacijaSkladista {
     }
 
     @Override
-    public void makeConfig(String s, Map<String, Object> map) {
+    public void makeConfig(String id, Map<String, Object> map) {
+        try {
+            Writer writer = new FileWriter(id);
+            new Gson().toJson(map, writer);
 
+            writer.close();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     @Override
-    public void makeDefaultConfig(String s, String s1) {
-
+    public void makeDefaultConfig(String id, String username) {
+        Map<String, Object> map = mapConfig(1000000, ".json", 10, username);
+        makeConfig(id,map);
     }
 
     @Override
@@ -237,7 +247,7 @@ public class GoogleDriveSkladiste extends SpecifikacijaSkladista {
     }
 
     @Override
-    public boolean checkUser(String s, String s1, String s2) {
+    public boolean checkUser(String id, String username1, String password1) {
         return false;
     }
 
