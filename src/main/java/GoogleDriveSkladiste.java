@@ -25,12 +25,27 @@ public class GoogleDriveSkladiste extends SpecifikacijaSkladista {
 
     private int br = 0;
     private int brojac = 0;
+    private String root;
+    private String connectedUser;
     static {
 
         Manager.registerImpl(new GoogleDriveSkladiste());
     }
 
-    public boolean createRoot(String s, String s1, String s2) {
+    public boolean createRoot(String pathId, String name, String username, String password) {
+
+        File file = new File();
+        file.setName(name);
+        file.setMimeType("application/vnd.google-apps.folder");
+
+        try {
+            file = getDriveService().files().create(file).setFields(pathId).execute();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        root = file.getId();
+        System.out.println("Folder ID: " + root);
+
         return false;
     }
 
@@ -40,7 +55,7 @@ public class GoogleDriveSkladiste extends SpecifikacijaSkladista {
     }
 
     @Override
-    public void createFile(String id, String name) {
+    public boolean createFile(String id, String name) {
 
         //String folderId = "0BwwA4oUTeiV1TGRPeTVjaWRDY1E";
         File fileMetadata = new File();
@@ -57,6 +72,7 @@ public class GoogleDriveSkladiste extends SpecifikacijaSkladista {
             e.printStackTrace();
         }
         System.out.println("File ID: " + file.getId());
+        return true;
 
     }
 
@@ -72,7 +88,7 @@ public class GoogleDriveSkladiste extends SpecifikacijaSkladista {
     }
 
     @Override
-    public void createFolder(String s, String s1) {
+    public boolean createFolder(String s, String s1) {
 
         File f = null;
         File file = new File();
@@ -85,6 +101,7 @@ public class GoogleDriveSkladiste extends SpecifikacijaSkladista {
         }
         System.out.println("Folder ID: " + f.getId());
         //dodati throws
+        return true;
     }
 
     /** POMERANJE FAJLA IZ FOLDERA U FOLDER
@@ -112,31 +129,48 @@ public class GoogleDriveSkladiste extends SpecifikacijaSkladista {
      */
 
     @Override
-    public void deleteFile(String fileId, String s1) {
+    public boolean deleteFile(String fileId, String s1) {
         try {
             getDriveService().files().delete(fileId).execute();
         } catch (IOException e) {
             System.out.println("An error occurred: " + e);
         }
+        return true;
     }
 
     @Override
-    public void deleteFolder(String fileId, String s1) {
+    public boolean deleteFolder(String fileId, String s1) {
 
         try {
             getDriveService().files().delete(fileId).execute();
         } catch (IOException e) {
             System.out.println("An error occurred: " + e);
         }
+        return true;
     }
 
     @Override
-    public void moveFromTo(String s, String s1, String s2) {
-
+    public boolean moveFromTo(String s, String s1, String s2) {
+        return false;
     }
 
-    @Override
-    public void downloadFile(String fileId) {
+    public boolean downloadFile(String s, String s1) {
+        return false;
+    }
+
+    public boolean copyPasteFiles(String s, String s1, String s2) {
+        return false;
+    }
+
+    public int countFiles() {
+        return 0;
+    }
+
+    public long countFilesMemory() {
+        return 0;
+    }
+
+    public boolean downloadFile(String fileId) {
         //String fileId = "0BwwA4oUTeiV1UVNwOHItT0xfa2M";
         OutputStream outputStream = new ByteArrayOutputStream();
         try {
@@ -145,6 +179,7 @@ public class GoogleDriveSkladiste extends SpecifikacijaSkladista {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return true;
     }
 
     @Override
@@ -158,8 +193,8 @@ public class GoogleDriveSkladiste extends SpecifikacijaSkladista {
     }
 
     @Override
-    public void updateConfig(String s, int i, String s1, int i1) {
-
+    public boolean updateConfig(String s, int i, String s1, int i1) {
+        return false;
     }
 
     @Override
@@ -173,8 +208,8 @@ public class GoogleDriveSkladiste extends SpecifikacijaSkladista {
     }
 
     @Override
-    public void addUser(String s, String s1, String s2, String s3) {
-
+    public boolean addUser(String s, String s1, String s2, String s3) {
+        return true;
     }
 
     @Override
