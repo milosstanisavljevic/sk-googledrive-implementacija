@@ -201,9 +201,12 @@ public class GoogleDriveSkladiste extends SpecifikacijaSkladista {
     @Override
     public void makeConfig(String id, Map<String, Object> map) {
         try {
-            Writer writer = new FileWriter(id);
+            java.io.File f  = new java.io.File(id);
+            //System.out.println(f.getPath());
+            //System.out.println(f.getAbsolutePath() +"\\"+ "aaaa");
+            Writer writer = new FileWriter(f.getAbsolutePath());
             new Gson().toJson(map, writer);
-
+            uploadFile(f, "config.json");
             writer.close();
         }catch (Exception e){
             e.printStackTrace();
@@ -321,7 +324,17 @@ public class GoogleDriveSkladiste extends SpecifikacijaSkladista {
                 .setApplicationName(APPLICATION_NAME)
                 .build();
     }
-
+    private void uploadFile(java.io.File filePath, String name)throws Exception{
+        File fileMetadata = new File();
+        fileMetadata.setName(name);
+        fileMetadata.setParents(Collections.singletonList(root));
+        //java.io.File filePath = new java.io.File("files/photo.jpg");
+        FileContent mediaContent = new FileContent(name + "/json", filePath);
+        File file = getDriveService().files().create(fileMetadata, mediaContent)
+                .setFields("id")
+                .execute();
+        System.out.println("File ID: " + file.getId());
+    }
     //public static void main(String[] args) throws IOException {
 //
         //Drive service = getDriveService();
