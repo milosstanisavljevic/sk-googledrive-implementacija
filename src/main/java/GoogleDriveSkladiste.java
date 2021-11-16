@@ -26,31 +26,40 @@ public class GoogleDriveSkladiste extends SpecifikacijaSkladista {
     private int br = 0;
     private int brojac = 0;
     private String root;
+    private Drive service;
     private String connectedUser;
+
     static {
 
         Manager.registerImpl(new GoogleDriveSkladiste());
     }
-
+    private Drive cRoot(){
+        try {
+            Drive drive = getDriveService();
+            return drive;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
     public boolean createRoot(String pathId, String name, String username, String password) {
-
+        service = cRoot();
         File file = new File();
         file.setName(name);
         file.setMimeType("application/vnd.google-apps.folder");
 
         try {
-            file = getDriveService().files().create(file).setFields(pathId).execute();
+            file =service.files().create(file).setFields(pathId).execute();
         } catch (IOException e) {
             e.printStackTrace();
         }
         root = file.getId();
         System.out.println("Folder ID: " + root);
 
-        return false;
+        return true;
     }
 
     public boolean checkIfRootExists(String s) {
-        //file.exist ne postoji
         return false;
     }
 
@@ -74,6 +83,11 @@ public class GoogleDriveSkladiste extends SpecifikacijaSkladista {
         System.out.println("File ID: " + file.getId());
         return true;
 
+    }
+
+    @Override
+    public String getPath() {
+        return root;
     }
 
     @Override
@@ -298,9 +312,10 @@ public class GoogleDriveSkladiste extends SpecifikacijaSkladista {
                 .build();
     }
 
-    public static void main(String[] args) throws IOException {
-
-        Drive service = getDriveService();
+    //public static void main(String[] args) throws IOException {
+//
+        //Drive service = getDriveService();
+//
 
 //        FileList result = service.files().list()
 //                .setPageSize(10)
@@ -315,5 +330,5 @@ public class GoogleDriveSkladiste extends SpecifikacijaSkladista {
 //                System.out.printf("%s (%s)\n", file.getName(), file.getId());
 //            }
 //        }
-    }
+   // }
 }
