@@ -200,13 +200,16 @@ public class GoogleDriveSkladiste extends SpecifikacijaSkladista {
     }
 
     @Override
-    public void makeConfig(String id, Map<String, Object> map) {
+    public void makeConfig(String s, Map<String, Object> map) {
         try {
-            java.io.File f  = new java.io.File(id);
+            java.io.File f  = new java.io.File(s);
             //System.out.println(f.getPath());
             //System.out.println(f.getAbsolutePath() +"\\"+ "aaaa");
-            Writer writer = new FileWriter(f.getAbsolutePath());
+            Writer writer = new FileWriter(f.getPath());
             new Gson().toJson(map, writer);
+            System.out.println(f.getPath() + "lunja");
+            System.out.println(f + "bunja");
+
 
             uploadFile(f, "config.json");
             writer.close();
@@ -327,21 +330,23 @@ public class GoogleDriveSkladiste extends SpecifikacijaSkladista {
                 .build();
     }
     private void uploadFile(java.io.File filePath, String name)throws Exception{
+        System.out.println(filePath + " proverica");
         AbstractInputStreamContent aisc = new FileContent(null,filePath);
         File fileMetadata = new File();
         fileMetadata.setName(name);
         fileMetadata.setParents(Collections.singletonList(root));
+        System.out.println(root + "provera");
         File file = getDriveService().files().create(fileMetadata,aisc).setFields("id, webContentLink, webViewLink, parents").execute();
         //java.io.File filePath = new java.io.File("files/photo.jpg");
        // FileContent mediaContent = new FileContent("application/vnd.google-apps.script.json", filePath);
         //File file = getDriveService().files().create(fileMetadata, mediaContent)
                // .setFields("id")
                // .execute();
-        System.out.println("File ID: KURCINA " + file.getId());
+        System.out.println("File ID: " + file.getId());
     }
-    //public static void main(String[] args) throws IOException {
+//    public static void main(String[] args) throws IOException {
 //
-        //Drive service = getDriveService();
+//          Drive service = getDriveService();
 //
 
 //        FileList result = service.files().list()
@@ -357,5 +362,5 @@ public class GoogleDriveSkladiste extends SpecifikacijaSkladista {
 //                System.out.printf("%s (%s)\n", file.getName(), file.getId());
 //            }
 //        }
-   // }
+ //   }
 }
