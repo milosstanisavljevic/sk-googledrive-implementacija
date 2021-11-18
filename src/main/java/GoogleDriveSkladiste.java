@@ -4,6 +4,7 @@ import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
+import com.google.api.client.http.AbstractInputStreamContent;
 import com.google.api.client.http.FileContent;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
@@ -206,6 +207,7 @@ public class GoogleDriveSkladiste extends SpecifikacijaSkladista {
             //System.out.println(f.getAbsolutePath() +"\\"+ "aaaa");
             Writer writer = new FileWriter(f.getAbsolutePath());
             new Gson().toJson(map, writer);
+
             uploadFile(f, "config.json");
             writer.close();
         }catch (Exception e){
@@ -325,15 +327,17 @@ public class GoogleDriveSkladiste extends SpecifikacijaSkladista {
                 .build();
     }
     private void uploadFile(java.io.File filePath, String name)throws Exception{
+        AbstractInputStreamContent aisc = new FileContent(null,filePath);
         File fileMetadata = new File();
         fileMetadata.setName(name);
         fileMetadata.setParents(Collections.singletonList(root));
+        File file = getDriveService().files().create(fileMetadata,aisc).setFields("id, webContentLink, webViewLink, parents").execute();
         //java.io.File filePath = new java.io.File("files/photo.jpg");
-        FileContent mediaContent = new FileContent(name + "/json", filePath);
-        File file = getDriveService().files().create(fileMetadata, mediaContent)
-                .setFields("id")
-                .execute();
-        System.out.println("File ID: " + file.getId());
+       // FileContent mediaContent = new FileContent("application/vnd.google-apps.script.json", filePath);
+        //File file = getDriveService().files().create(fileMetadata, mediaContent)
+               // .setFields("id")
+               // .execute();
+        System.out.println("File ID: KURCINA " + file.getId());
     }
     //public static void main(String[] args) throws IOException {
 //
