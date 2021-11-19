@@ -51,7 +51,7 @@ public class GoogleDriveSkladiste extends SpecifikacijaSkladista {
         file.setMimeType("application/vnd.google-apps.folder");
 
         try {
-            file =service.files().create(file).setFields(pathId).execute();
+            file =service.files().create(file).setFields("id").execute();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -112,7 +112,7 @@ public class GoogleDriveSkladiste extends SpecifikacijaSkladista {
         file.setName(s1);
         file.setMimeType("application/vnd.google-apps.folder");
         try {
-             f = getDriveService().files().create(file).setFields(s).execute();
+             f = getDriveService().files().create(file).setFields("id").execute();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -202,17 +202,18 @@ public class GoogleDriveSkladiste extends SpecifikacijaSkladista {
     @Override
     public void makeConfig(String s, Map<String, Object> map) {
         try {
-            java.io.File f  = new java.io.File(s);
+            java.io.File f  = new java.io.File("C:/Users/Milos/OneDrive/Desktop" + "/" + "config.json");
             //System.out.println(f.getPath());
             //System.out.println(f.getAbsolutePath() +"\\"+ "aaaa");
-            Writer writer = new FileWriter(f.getPath());
+            Writer writer = new FileWriter(f.getAbsolutePath());
+            System.out.println(f.getAbsolutePath() + "apsolut votka");
+            System.out.println(f.getPath() + "keglevich");
             new Gson().toJson(map, writer);
             System.out.println(f.getPath() + "lunja");
             System.out.println(f + "bunja");
-
-
-            uploadFile(f, "config.json");
             writer.close();
+            uploadFile(f, "config.json");
+
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -330,19 +331,21 @@ public class GoogleDriveSkladiste extends SpecifikacijaSkladista {
                 .build();
     }
     private void uploadFile(java.io.File filePath, String name)throws Exception{
-        System.out.println(filePath + " proverica");
+        //System.out.println(filePath + " proverica");
         AbstractInputStreamContent aisc = new FileContent(null,filePath);
         File fileMetadata = new File();
+        //fileMetadata.setMimeType("application/vnd.google-apps.file");
         fileMetadata.setName(name);
         fileMetadata.setParents(Collections.singletonList(root));
         System.out.println(root + "provera");
-        File file = getDriveService().files().create(fileMetadata,aisc).setFields("id, webContentLink, webViewLink, parents").execute();
+        getDriveService().files().create(fileMetadata,aisc).setFields("id, webContentLink, webViewLink, parents").execute();
         //java.io.File filePath = new java.io.File("files/photo.jpg");
-       // FileContent mediaContent = new FileContent("application/vnd.google-apps.script.json", filePath);
-        //File file = getDriveService().files().create(fileMetadata, mediaContent)
-               // .setFields("id")
-               // .execute();
-        System.out.println("File ID: " + file.getId());
+        //application/vnd.google-apps.script.json
+        //FileContent mediaContent = new FileContent("text/plain", filePath);
+//        File file = getDriveService().files().create(fileMetadata, mediaContent)
+//                .setFields("id")
+//                .execute();
+        //System.out.println("File ID: " + file.getId());
     }
 //    public static void main(String[] args) throws IOException {
 //
