@@ -28,6 +28,7 @@ public class GoogleDriveSkladiste extends SpecifikacijaSkladista {
     private int br = 0;
     private int brojac = 0;
     private String root;
+    private String name;
     private Drive service;
     private String connectedUser;
 
@@ -46,9 +47,16 @@ public class GoogleDriveSkladiste extends SpecifikacijaSkladista {
     }
     public boolean createRoot(String pathId, String name, String username, String password) {
         service = cRoot();
+        this.name = name;
         File file = new File();
         file.setName(name);
         file.setMimeType("application/vnd.google-apps.folder");
+
+        try {
+            makeCopy(pathId);
+        } catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
 
         try {
             file =service.files().create(file).setFields("id").execute();
@@ -63,7 +71,38 @@ public class GoogleDriveSkladiste extends SpecifikacijaSkladista {
         return true;
     }
 
-    public boolean checkIfRootExists(String s) {
+    private void makeCopy(String id) throws IOException {
+        java.io.File f = new java.io.File("MyRoots");
+        if(!f.exists()){
+            f.createNewFile();
+        }
+
+        FileWriter fileWriter = new FileWriter(f, true);
+
+        BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
+        bufferedWriter.write(id + "\\" + name + "\n");
+        bufferedWriter.close();
+    }
+
+    public boolean checkIfRootExists(String id, String name) {
+        try {
+            java.io.File file = new java.io.File("MyRoots");
+            FileReader fr = new FileReader(file);
+            BufferedReader br = new BufferedReader(fr);
+
+            String line;
+            while ((line = br.readLine()) != null) {
+                if((line + "\\" + name).equalsIgnoreCase(id)){
+                    System.out.println(line);
+                    System.out.println(id);
+                    return true;
+                }
+            }
+            fr.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         return false;
     }
 
