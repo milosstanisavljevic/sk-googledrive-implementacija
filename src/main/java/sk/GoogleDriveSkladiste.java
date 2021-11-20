@@ -27,6 +27,7 @@ public class GoogleDriveSkladiste extends SpecifikacijaSkladista {
     private int br = 0;
     private int brojac = 0;
     private String root;
+    private String name;
     private Drive service;
     private String connectedUser;
 
@@ -45,9 +46,16 @@ public class GoogleDriveSkladiste extends SpecifikacijaSkladista {
     }
     public boolean createRoot(String pathId, String name, String username, String password) {
         service = cRoot();
+        this.name = name;
         File file = new File();
         file.setName(name);
         file.setMimeType("application/vnd.google-apps.folder");
+
+        try {
+            makeCopy(pathId);
+        } catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
 
         try {
             file =service.files().create(file).setFields("id").execute();
@@ -55,13 +63,45 @@ public class GoogleDriveSkladiste extends SpecifikacijaSkladista {
             e.printStackTrace();
         }
         root = file.getId();
-        makeDefaultConfig(root, username);
+        makeDefaultConfig(pathId, username);
+        makeDefaultUser(pathId, username, password);
         System.out.println("Folder ID: " + root);
 
         return true;
     }
 
-    public boolean checkIfRootExists(String s) {
+    private void makeCopy(String id) throws IOException {
+        java.io.File f = new java.io.File("MyRoots");
+        if(!f.exists()){
+            f.createNewFile();
+        }
+
+        FileWriter fileWriter = new FileWriter(f, true);
+
+        BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
+        bufferedWriter.write(id + "\\" + name + "\n");
+        bufferedWriter.close();
+    }
+
+    public boolean checkIfRootExists(String id, String name) {
+        try {
+            java.io.File file = new java.io.File("MyRoots");
+            FileReader fr = new FileReader(file);
+            BufferedReader br = new BufferedReader(fr);
+
+            String line;
+            while ((line = br.readLine()) != null) {
+                if((line + "\\" + name).equalsIgnoreCase(id)){
+                    System.out.println(line);
+                    System.out.println(id);
+                    return true;
+                }
+            }
+            fr.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         return false;
     }
 
@@ -199,17 +239,11 @@ public class GoogleDriveSkladiste extends SpecifikacijaSkladista {
     }
 
     @Override
-    public void makeConfig(String s, Map<String, Object> map) {
+    public void makeConfig(String path, Map<String, Object> map) {
         try {
-            java.io.File f  = new java.io.File("C:/Users/Milos/OneDrive/Desktop" + "/" + "config.json");
-            //System.out.println(f.getPath());
-            //System.out.println(f.getAbsolutePath() +"\\"+ "aaaa");
+            java.io.File f  = new java.io.File(path + "/" + "config.json");
             Writer writer = new FileWriter(f.getAbsolutePath());
-            System.out.println(f.getAbsolutePath() + "apsolut votka");
-            System.out.println(f.getPath() + "keglevich");
             new Gson().toJson(map, writer);
-            System.out.println(f.getPath() + "lunja");
-            System.out.println(f + "bunja");
             writer.close();
             uploadFile(f, "config.json");
 
@@ -230,13 +264,29 @@ public class GoogleDriveSkladiste extends SpecifikacijaSkladista {
     }
 
     @Override
-    public void makeUser(String s, List<Korisnik> list) {
+    public void makeUser(String path, List<Korisnik> korisnici) {
+        try {
+            java.io.File f  = new java.io.File(path + "/" + "config.json");
+            Writer writer = new FileWriter(f.getAbsolutePath());
+            new Gson().toJson(korisnici,writer);
+            writer.close();
+            uploadFile(f, "users.json");
 
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+       // new Gson().toJson(korisnici,writer);
     }
 
     @Override
-    public void makeDefaultUser(String s, String s1, String s2) {
-
+    public void makeDefaultUser(String path, String username, String password) {
+        try {
+            List<Korisnik> korisnici = loadUsers(username, password, true, true, true, true);
+            makeUser(path, korisnici);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -330,39 +380,14 @@ public class GoogleDriveSkladiste extends SpecifikacijaSkladista {
                 .build();
     }
     private void uploadFile(java.io.File filePath, String name)throws Exception{
-        //System.out.println(filePath + " proverica");
         AbstractInputStreamContent aisc = new FileContent(null,filePath);
         File fileMetadata = new File();
-        //fileMetadata.setMimeType("application/vnd.google-apps.file");
+
         fileMetadata.setName(name);
         fileMetadata.setParents(Collections.singletonList(root));
-        System.out.println(root + "provera");
-        getDriveService().files().create(fileMetadata,aisc).setFields("id, webContentLink, webViewLink, parents").execute();
-        //java.io.File filePath = new java.io.File("files/photo.jpg");
-        //application/vnd.google-apps.script.json
-        //FileContent mediaContent = new FileContent("text/plain", filePath);
-//        File file = getDriveService().files().create(fileMetadata, mediaContent)
-//                .setFields("id")
-//                .execute();
-        //System.out.println("File ID: " + file.getId());
-    }
-//    public static void main(String[] args) throws IOException {
-//
-//          Drive service = getDriveService();
-//
 
-//        FileList result = service.files().list()
-//                .setPageSize(10)
-//                .setFields("nextPageToken, files(id, name)")
-//                .execute();
-////        List<File> files = result.getFiles();
-//        if (files == null || files.isEmpty()) {
-//            System.out.println("No files found.");
-//        } else {
-//            System.out.println("Files:");
-//            for (File file : files) {
-//                System.out.printf("%s (%s)\n", file.getName(), file.getId());
-//            }
-//        }
- //   }
+        getDriveService().files().create(fileMetadata,aisc).setFields("id, webContentLink, webViewLink, parents").execute();
+
+    }
+
 }
